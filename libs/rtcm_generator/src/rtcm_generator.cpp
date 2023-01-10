@@ -361,6 +361,38 @@ size_t RTCMGenerator::generate(OSR* osr, bool got_reference_station, unsigned ch
         }
     };
 
+    // custom code to add each message bytes into vector. To get us a list of buffers  
+    auto appendVector = [&](rtcm_t*& message) {
+        if (message != nullptr) {
+            std::vector<unsigned char> newMsg;
+            newMsg.assign(message->buff, message->buff + message->nbyte);
+            messageList->push_back(newMsg);
+        }
+    };
+
+    // custom code to add each message bytes into vector. To get us a list of buffers
+    if (messageList != nullptr)
+    {
+        appendVector(rtcm_1030);
+        appendVector(rtcm_1031);
+        appendVector(rtcm_1230);
+
+        appendVector(rtcm_1097);
+        appendVector(rtcm_1087);
+        appendVector(rtcm_1077);
+        appendVector(rtcm_1096);
+        appendVector(rtcm_1086);
+        appendVector(rtcm_1076);
+        appendVector(rtcm_1095);
+        appendVector(rtcm_1085);
+        appendVector(rtcm_1075);
+        appendVector(rtcm_1094);
+        appendVector(rtcm_1084);
+        appendVector(rtcm_1074);
+        appendVector(rtcm_1006);
+        appendVector(rtcm_1032);
+    }
+
     append(rtcm_1006);
     append(rtcm_1032);
     append(rtcm_1030);

@@ -3,6 +3,7 @@
 #include <cell_id.h>
 #include <chrono>
 #include <vector>
+#include <functional>
 #include "asn_helper.h"
 #define AD_REQUEST_INVALID ((LPP_Client::AD_Request)(0))
 
@@ -44,10 +45,10 @@ class SUPL_Client;
 class LPP_Client {
 public:
     typedef int32_t AD_Request;
-    typedef void (*AD_Callback)(LPP_Client*, LPP_Transaction*, LPP_Message*,
-                                void*);
-    typedef bool (*PLI_Callback)(LocationInformation*, void*);
-    typedef bool (*PECID_Callback)(ECIDInformation*, void*);
+    // typedef void (*AD_Callback)(LPP_Client*, LPP_Transaction*, LPP_Message*,
+    //                             void*);
+    // typedef bool (*PLI_Callback)(LocationInformation*, void*);
+    // typedef bool (*PECID_Callback)(ECIDInformation*, void*);
 
     struct ProvideLI {
         LocationInformationType_t             type;
@@ -70,9 +71,10 @@ public:
     // Request assistance data for a specific cell-id. The callback will be
     // called for each assistance data message the client receives.
     AD_Request request_assistance_data(CellID cell, void* userdata,
-                                       AD_Callback callback);
+                                       std::function<void(LPP_Client*, LPP_Transaction*, LPP_Message*, void*)> callback);
     AD_Request request_assistance_data_ssr(CellID cell, void* userdata,
-                                           AD_Callback callback);
+                                           std::function<void(LPP_Client*, LPP_Transaction*, LPP_Message*, void*)> callback);
+
 
     // Update assistance data request with new cell-id.
     bool update_assistance_data(AD_Request id, CellID cell);
@@ -84,9 +86,10 @@ public:
     // device. The information is provided to the LPP client through callbacks:
     // provide_location_information_callback and provide_ecid_callback. Return
     // false in the callback to indicate that no location information exists.
-    void provide_location_information_callback(void*        userdata,
-                                               PLI_Callback callback);
-    void provide_ecid_callback(void* userdata, PECID_Callback callback);
+    void provide_location_information_callback(void* userdata,
+                                               std::function<bool(LocationInformation*, void*)> callback);
+    void provide_ecid_callback(void* userdata, std::function<bool(ECIDInformation*, void*)> callback);
+
 
 private:
     bool wait_for_assistance_data_response(LPP_Transaction* transaction);
@@ -114,15 +117,15 @@ private:
     long                         transaction_counter;
 
     // TODO(ewasjon): support multiple requests
-    AD_Request      main_request;
-    AD_Callback     main_request_callback;
-    void*           main_request_userdata;
-    LPP_Transaction main_request_transaction;
+    AD_Request                                                                  main_request;
+    std::function<void(LPP_Client*, LPP_Transaction*, LPP_Message*, void*)>     main_request_callback;
+    void*                                                                       main_request_userdata;
+    LPP_Transaction                                                             main_request_transaction;
 
-    PLI_Callback pli_callback;
+    std::function<bool(LocationInformation*, void*)> pli_callback;
     void*        pli_userdata;
 
-    PECID_Callback pecid_callback;
+    std::function<bool(ECIDInformation*, void*)> pecid_callback;
     void*          pecid_userdata;
 
     ProvideLI provide_li;

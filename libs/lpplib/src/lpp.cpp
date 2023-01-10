@@ -344,7 +344,7 @@ bool LPP_Client::wait_for_assistance_data_response(LPP_Transaction* transaction)
 }
 
 LPP_Client::AD_Request LPP_Client::request_assistance_data(CellID cell, void* userdata,
-                                                           AD_Callback callback) {
+                                                           std::function<void(LPP_Client*, LPP_Transaction*, LPP_Message*, void*)> callback) {
     if (main_request != AD_REQUEST_INVALID) return AD_REQUEST_INVALID;
 
     auto periodic_id = 1;  // TODO(ewasjon): support multiple requests
@@ -371,7 +371,7 @@ LPP_Client::AD_Request LPP_Client::request_assistance_data(CellID cell, void* us
 }
 
 LPP_Client::AD_Request LPP_Client::request_assistance_data_ssr(CellID cell, void* userdata,
-                                                               AD_Callback callback) {
+                                                               std::function<void(LPP_Client*, LPP_Transaction*, LPP_Message*, void*)> callback) {
     if (main_request != AD_REQUEST_INVALID) return AD_REQUEST_INVALID;
 
     auto periodic_id = 1;  // TODO(ewasjon): support multiple requests
@@ -422,12 +422,12 @@ bool LPP_Client::cancel_assistance_data(AD_Request id) {
 }
 
 void LPP_Client::provide_location_information_callback(void*                    userdata,
-                                                       LPP_Client::PLI_Callback callback) {
+                                                       std::function<bool(LocationInformation*, void*)> callback) {
     pli_callback = callback;
     pli_userdata = userdata;
 }
 
-void LPP_Client::provide_ecid_callback(void* userdata, LPP_Client::PECID_Callback callback) {
+void LPP_Client::provide_ecid_callback(void* userdata, std::function<bool(ECIDInformation*, void*)> callback) {
     pecid_callback = callback;
     pecid_userdata = userdata;
 }
